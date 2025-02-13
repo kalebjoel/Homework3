@@ -1,0 +1,221 @@
+---
+title: "Homework 3"
+author: "Kaleb Luna | kl36927"
+date: "2025-02-12"
+output: pdf_document
+---
+
+```{r setup, echo = FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+GitHub Link: <https://github.com/kalebjoel/Homework3.git>
+
+<P style="page-break-before: always">
+
+\newpage
+
+# Problem 1: Gas Stations
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(dplyr)
+gaspricesData <- read.csv("gasprices.csv")
+```
+
+## Assessments of Proposed Theories
+
+### Theory A: "Gas stations charge more if they lack direct competition in sight."
+
+```{r echo =FALSE}
+ggplot(gaspricesData, aes(x = factor(Competitors), y = Price)) + 
+  geom_boxplot() +
+  labs(title = "Gas Price vs. Presence of Competitors", x = "Competitors Present", y = "Gas Price")
+```
+
+Based on the data above, the theory that **gas stations charge more if they lack direct competition in sight** is supported as **the median gas price for gas stations without the presence of competitors is higher than the median gas price for gas stations in the presence of competitors**. This conveys that gas stations with no present competition nearby typically raise their prices as drivers are faced with little to no alternatives.
+
+### Theory B: "The richer the area, the higher the gas prices."
+
+```{r echo = FALSE}
+ggplot(gaspricesData, aes(x=Income, y = Price)) + 
+  geom_point() + 
+  labs(title = "Income vs. Price", x = "Median Household Income", y = "Gas Price")
+# cor(gaspricesData$Income, gaspricesData$Price)
+```
+
+The scatter plot displaying the relationship between **Median Household Income** and **Gas Price** shows a weak, positive relationship, indicating that although it shows a correlation between the two variables, it isn't plausible to conclude that increasing **Gas Prices** are consistent with increasing **Median Household Income**, with a correlation coefficient of approximately 0.40.
+
+### Theory C: "Gas stations at stoplights charge more."
+
+```{r echo = FALSE}
+ggplot(gaspricesData, aes(x=factor(Stoplight), y = Price)) +
+  geom_boxplot() +
+  labs(title = "Gas Price vs. Stoplight", x = "Stoplight", y = "Gas Price")
+
+```
+
+According to the figure above, the box plot that shows g**as stations at stoplights** has a **higher median price** than g**as stations that are not located at stoplights**, indicating that the theory that gas stations at stoplights charge more is supported. Gas stations located at stoplights may use their location to their advantage as drivers tend to see their stop as a decision out of convenience.
+
+### Theory D: "Gas stations with direct highway access charge more."
+
+```{r echo = FALSE}
+ggplot(gaspricesData, aes(x=factor(Highway), y=Price)) +
+  geom_boxplot() +
+  labs(title = "Gas Price vs. Highway Access", x = "Highway Access", y = "Gas Price")
+
+```
+
+According to the figure above, the box plot that shows **gas stations with highway access** contains a **higher median gas price** than **gas stations without direct highway access**, indicating that **the theory that gas stations with direct highway access charge more is supported.** Similar to previous mentioned theories, gas stations often capitalize on the convenience factor that most drivers prefer, as drivers are typically faced with limited options at this point.
+
+### Theory E: "Shell charges more than all other non-Shell brands."
+
+```{r echo = FALSE}
+ggplot(gaspricesData, aes(x = Brand, y = Price)) + 
+  geom_bar(stat="summary", fun="mean") + 
+  labs(title = "Average Gas Price by Brand", x = "Brand", y = "Average Gas Price")
+
+```
+
+According to the bar plot comparing the average gas prices by brand, it can be seen that **there is no significant difference between the four major gas fuel brands**, including Chevron-Texaco, Exxon Mobil, Shell, and other, indicating that **the theory that Shell charges more than all other non-shell brands is not supported**. This suggests that gas prices are more likely to be influenced by other factors including location, competitors, and convenience as found in previous figures.
+
+<P style="page-break-before: always">
+
+\newpage
+
+# Problem 2: Mercedes S-Class Vehicles 
+
+```{r pagebreak, echo = FALSE}
+sclassData <- read.csv("sclass.csv")
+```
+
+## Part A
+
+```{r echo = FALSE}
+sclassA <- sclassData |> filter(year == 2011, trim == "63 AMG")
+meanMilesA <- mean(sclassA$mileage)
+seMilesA <- sd(sclassA$mileage) / sqrt(nrow(sclassA))
+ci_A <- c(meanMilesA - 1.96 * seMilesA, meanMilesA + 1.96 * seMilesA)
+print(paste("The 95% Confidence Interval for the proportion of the average mileage of 2011 S-Class 63 AMGs:", round(ci_A,2)))
+```
+
+## Part B
+
+```{r echo = FALSE}
+sclassB <- sclassData |> filter(year == 2014, trim == "550") |>
+  mutate(isBlack = color == "Black")
+propBlackB <- mean(sclassB$isBlack)
+sePropBlackB <- sqrt((propBlackB * (1 - propBlackB)) / nrow(sclassB))
+ci_B <- c(propBlackB - 1.96 * sePropBlackB, propBlackB + 1.96 * sePropBlackB)
+print(paste("95% CI for proportion of Black 2014 550s:", round(ci_B,2)))
+```
+
+<P style="page-break-before: always">
+
+\newpage
+
+# Problem 3: TV Shows 
+
+```{r echo = FALSE}
+nbcData <- read.csv("nbc_pilotsurvey.csv")
+```
+
+## Part A: *"Living with Ed"* vs. *"My Name is Earl"*
+
+```{r echo = FALSE, message = FALSE, results = "hide"}
+surveyA <- nbcData |> 
+  filter(Show == "Living with Ed" | Show == "My Name is Earl")
+meansA <- surveyA |> group_by(Show) |> 
+  summarize(mean_happy = mean(Q1_Happy),
+            se_happy = sd(Q1_Happy)/sqrt(n()))
+diffMeanA <- diff(meansA$mean_happy)
+diffseA <- c(diff(meansA$se_happy^2))
+ci_A <- c(diffMeanA - 1.96 * diffseA, diffMeanA + 1.96 * diffseA)
+print(paste("The 95% Confidence Interval for the mean difference in viewer response to the Q1_Happy question for these two shows is:", round(ci_A, 2)))
+
+# print(diffMeanA)
+# print(diffseA)
+```
+
+Which show makes people happier? "Living with Ed" or "My Name is Earl"? To investigate this question, I filtered the dataset to distinguish the responses from only the two shows of interests and obtain the mean Q1_Happy rating from both TV shows. Then, I calculated the 95% confidence intervals of the difference of means in order to test the significance of the data, which provides a measure of uncertainty when estimating the ratings between the two shows. The difference of means, standard errors, and the confidence interval are approximately -0.150, -0.00525, and -0.14 to -0.16, respectively. The confidence interval does not contain a value of 0; therefore, it can be concluded that one show produces higher happiness ratings on a consistent basis.
+
+## Part B: *"The Biggest Loser"* vs. *"The Apprentice: Los Angeles"*
+
+```{r echo = FALSE, message = FALSE, results = "hide" }
+surveyB <- nbcData |> 
+  filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+meansB <- surveyB |> group_by(Show) |> 
+  summarize(mean_annoyed = mean(Q1_Annoyed),
+            se_annoyed = sd(Q1_Annoyed)/sqrt(n()))
+diffMeanB <- diff(meansB$mean_annoyed)
+diffseB <- c(diff(meansB$se_annoyed^2))
+ci_B <- c(diffMeanB - 1.96 * diffseB, diffMeanB + 1.96 * diffseB)
+print(paste("The 95% Confidence Interval for the mean difference in viewer response to the Q1_Annoyed question for these two shows is:", round(ci_B, 2)))
+
+# print(diffMeanB)
+# print(diffseB)
+```
+
+To explore the question of which reality show made people feel more annoyed when watching, I filtered the dataset to only contain responses from the two shows of interest: "The Biggest Loser" and "The Apprentice: Los Angeles." Then, I calculated the 95% confidence interval for the difference in means. The difference of means, difference of standard errors, and the confidence interval are approximately -0.271, -0.000436, and -0.27, respectively. The results as a whole do provide convincing evidence that one show is rated "more annoying" than the other as the confidence interval does not contain 0.
+
+## Part C: *"Dancing with the Stars"*
+
+```{r echo = FALSE, message = FALSE, results = "hide"}
+surveyC <- nbcData |> 
+  filter(Show == "Dancing with the Stars") |> 
+  mutate(isConfusing = Q2_Confusing >= 4)
+
+propConfusing <- mean(surveyC$isConfusing)
+seConfusing <- sqrt((propConfusing * (1 - propConfusing)) / nrow(surveyC))
+ciC <- c(propConfusing - 1.96 * seConfusing, propConfusing + 1.96 * seConfusing)
+print(paste("The 95% Confidence Interval for the proportion of viewers who found 'Dancing with the Stars' confusing is:", round(ciC, 2)))
+print(propConfusing)
+
+```
+
+To investigate the question of what proportion of American viewers find the show "Dancing with the Stars" confusing, I filtered the data set to include only the responses for the show of interest and calculated the proportion of American viewers who gave it a confusing rating and a 95% confidence interval. With a calculated proportion of approximately 0.0773 and a confidence interval of 0.04 to 0.12, this provides an estimate of how viewers often find the show confusing when watching. Because the confidence interval is relatively high, it can be concluded that a majority of proportion of viewers agree that they find "Dancing with the Stars" confusing.
+
+<P style="page-break-before: always">
+
+\newpage
+
+# Problem 4: EBay
+
+```{r echo = FALSE}
+ebayData <- read.csv("ebay.csv")
+ebayData <- ebayData |>
+  mutate(rev_ratio = rev_after/ rev_before)
+
+treatment <- ebayData |>
+  filter(adwords_pause == 1)
+control <- ebayData |> 
+  filter(adwords_pause == 0)
+
+meanTreatment <- mean(treatment$rev_ratio, na.rm = TRUE)
+meanControl <- mean(control$rev_ratio, na.rm = TRUE)
+
+observedDiff <- meanTreatment - meanControl
+
+set.seed(123)
+B <- 10000
+boot_diffs <- replicate(B, {
+  sampleTreatment <- sample(treatment$rev_ratio, replace = TRUE)
+  sampleControl <- sample(control$rev_ratio, replace = TRUE)
+  mean(sampleTreatment) - mean(sampleControl)
+})
+
+conf_int <- quantile(boot_diffs, c(0.025, 0.975))
+
+cat("Observed difference in revenue ratio:", observedDiff, "\n")
+cat("95% Confidence Interval:", conf_int[1], "to", conf_int[2], "\n")
+
+ggplot(data.frame(boot_diffs), aes(x=boot_diffs)) +
+  geom_histogram(binwidth = 0.01, fill = "maroon", alpha = 0.5, color = "black") + 
+  geom_vline(xintercept = conf_int, linetype = "dashed", color = "red") +
+  labs(title = "Bootstrap Distribution of Revenue Ratio Difference", 
+       x ="Difference in Revenue Ratio",
+       y = "Frequency")
+
+```
+
+When exploring the question of whether or not Google paid search advertising affects eBay's revenue ratio at the DMA level, I calculated the revenue ratio by dividing the revenue after by the revenue before for each DMA and compared the mean revenue ratios between the treatment (paused ads) and control groups (unpaused ads). In this bootstrap method, 10,000 Monte Carlo simulations were utilized in order to calculate the 95% confidence intervals for the difference of means. The difference in revenue ratios was -0.0523, with a confidence interval of -0.0914 to -0.0129, which suggests that pausing Google paid search advertising is statistically significant in the decrease of the revenue ratio. Overall, this result suggests that Google paid search advertising does in fact increase eBay's revenue.
